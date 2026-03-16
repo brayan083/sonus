@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Resumir múltiples{% endblock %}
+{% block topbar %}Resumir transcripciones{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/summarize.css">
+<style>
+  .files-list { list-style: none; padding: 0; margin: 0 0 1.5rem; counter-reset: forder; }
+  .files-list li {
+    counter-increment: forder;
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.35rem;
+    background: var(--surface2);
+    font-size: 0.85rem;
+  }
+  .files-list li::before {
+    content: counter(forder);
+    display: flex; align-items: center; justify-content: center;
+    min-width: 1.4rem; height: 1.4rem;
+    border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 0.7rem; font-weight: 700;
+  }
+  .files-list .fname { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .files-list .fmeta { color: var(--text-dim); font-size: 0.78rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="summarize-wrap">
+  <form method="post" action="/summarize_multi">
+    {% for t in transcripciones %}
+    <input type="hidden" name="ids" value="{{ t.job_id }}">
+    {% endfor %}
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <h2>Transcripciones a resumir <span class="ai-badge">✨ {{ provider_label }}</span></h2>
+      <p style="font-size:0.82rem; color:var(--text-dim); margin-bottom:0.75rem;">
+        Se resumirán en el siguiente orden. Si necesitas cambiar el orden, vuelve al historial.
+      </p>
+      <ol class="files-list">
+        {% for t in transcripciones %}
+        <li>
+          <span class="fname">{{ t.filename }}</span>
+          <span class="fmeta">{{ t.segments }} seg · {{ t.duration }}</span>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2>Opciones de resumen</h2>
+
+      <div class="field">
+        <label for="summary_name">Nombre del resumen</label>
+        <input type="text" name="summary_name" id="summary_name" placeholder="Ej: Resumen clase completa" value="Resumen - {{ transcripciones|length }} transcripciones">
+      </div>
+
+      <div class="field">
+        <label for="summary_type">Tipo de resumen</label>
+        <select name="summary_type" id="summary_type">
+          {% for key, label in summary_types.items() %}
+          <option value="{{ key }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="length">Extensión</label>
+        <select name="length" id="length">
+          <option value="short">Corto</option>
+          <option value="medium" selected>Medio</option>
+          <option value="detailed">Detallado</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="language">Idioma del resumen</label>
+        <select name="language" id="language">
+          {% for code, label in languages.items() %}
+          {% if code != 'auto' %}
+          <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>{{ label }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="submit-wrap">
+        <button type="submit" class="btn btn-primary">✨ Generar resumen</button>
+        <a href="/history" class="btn btn-ghost">Volver</a>
+      </div>
+      <p class="ollama-info">Usando <code>{{ provider_model }}</code> ({{ provider_label }}). <a href="/settings">Cambiar</a></p>
+    </div>
+  </form>
+</div>
+{% endblock %}

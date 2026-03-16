@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Data (keep folder structure, ignore generated files)
+app/data/**
+!app/data/.gitkeep
+!app/data/uploads/.gitkeep
+!app/data/transcripciones/.gitkeep
+!app/data/summary/.gitkeep
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+clase1_POO.mp4

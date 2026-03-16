@@ -1,0 +1,19 @@
+.placeholder-wrap {
+  max-width: 500px;
+  margin: 4rem auto;
+  text-align: center;
+}
+.placeholder-icon { font-size: 3rem; margin-bottom: 1.25rem; }
+.placeholder-wrap h2 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.placeholder-wrap p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+.badge-soon {
+  display: inline-block;
+  background: rgba(59,130,246,0.15);
+  color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}

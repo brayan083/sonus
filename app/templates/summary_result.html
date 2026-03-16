@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Resumen{% endblock %}
+{% block topbar %}Resultado del resumen{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/summary_result.css">
+{% endblock %}
+
+{% block content %}
+<div class="summary-wrap">
+
+  <div id="processing" class="card">
+    <div class="spinner"></div>
+    <p id="processingTitle">Generando resumen con IA…</p>
+    <p id="processingText">Esto puede tardar unos segundos.</p>
+  </div>
+
+  <div id="error"></div>
+
+  <div id="result">
+    <div class="card" style="flex:1;">
+      <div class="summary-header">
+        <div>
+          <h2 class="summary-title" id="summaryTitle"></h2>
+          <div class="summary-meta" id="summaryMeta"></div>
+        </div>
+        <div class="summary-header-actions">
+          <button class="btn btn-primary btn-sm" onclick="copySummary()">📋 &nbsp;Copiar</button>
+          <span class="copied-msg" id="copiedMsg">Copiado</span>
+        </div>
+      </div>
+      <div class="glow-divider"></div>
+      <div class="summary-content" id="summaryContent"></div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/pages/summary_result.js" data-summary-id="{{ summary_id }}"></script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Transcribir{% endblock %}
+{% block topbar %}Transcribir audio o video{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/index.css">
+{% endblock %}
+
+{% block content %}
+<div id="activeJobsBanner" style="display:none; margin-bottom:1rem;"></div>
+<form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data" style="height:100%; display:flex; flex-direction:column;">
+  <div class="upload-grid" style="flex:1;">
+    <div class="card upload-main">
+      <div class="drop-area" id="dropArea">
+        <input type="file" name="video" id="fileInput" accept="video/*,audio/*">
+        <div class="drop-icon">🎬</div>
+        <div>Arrastra tu archivo aquí o <label for="fileInput">selecciona uno</label></div>
+        <p>Video o audio — mp4, mp3, m4a, wav, mov…</p>
+      </div>
+      <div class="file-info" id="fileInfo"></div>
+      <div class="submit-wrap">
+        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+          ⬆️ &nbsp;Iniciar transcripción
+        </button>
+      </div>
+    </div>
+
+    <div class="card info-card">
+      <h3>Configuración</h3>
+      <div class="info-row">
+        <span>Modelo</span>
+        <select name="model" class="cfg-select">
+          {% for m in models %}
+          <option value="{{ m.id }}" {% if m.id == current_model %}selected{% endif %}>
+            {{ m.label }}{% if m.type == 'api' %} 🌐{% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="info-row">
+        <span>Idioma</span>
+        <select name="language" class="cfg-select">
+          {% for code, label in languages.items() %}
+          <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="info-row"><span>Dispositivo</span><span id="deviceLabel">Apple MPS</span></div>
+
+      <div class="formats">
+        <h3>Formatos soportados</h3>
+        <span class="format-tag">mp4</span>
+        <span class="format-tag">mp3</span>
+        <span class="format-tag">m4a</span>
+        <span class="format-tag">wav</span>
+        <span class="format-tag">mov</span>
+        <span class="format-tag">mkv</span>
+        <span class="format-tag">webm</span>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/pages/index.js"></script>
+{% endblock %}

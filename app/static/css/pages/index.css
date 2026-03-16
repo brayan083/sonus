@@ -1,0 +1,102 @@
+.upload-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+.upload-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.drop-area {
+  flex: 1;
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 0 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+.drop-area:hover, .drop-area.dragover {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+}
+.drop-area input[type="file"] { display: none; }
+.drop-area .drop-icon { font-size: 3rem; margin-bottom: 1rem; }
+.drop-area p { color: var(--text-dim); font-size: 0.875rem; margin-top: 0.4rem; }
+.drop-area label { color: var(--accent); cursor: pointer; font-weight: 600; }
+.drop-area label:hover { text-decoration: underline; }
+
+.file-info {
+  margin-top: 1rem;
+  padding: 0.65rem 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--text);
+  display: none;
+}
+.file-info.visible { display: block; }
+
+.submit-wrap { margin-top: 1rem; }
+.submit-wrap .btn { width: 100%; justify-content: center; padding: 0.8rem; font-size: 0.95rem; }
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-card h3 {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.75rem;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+[data-theme="light"] .info-row { border-bottom-color: var(--border); }
+.info-row:last-of-type { border-bottom: none; }
+.info-row span:first-child { color: var(--text-dim); }
+.info-row span:last-child  { font-weight: 500; color: var(--text); }
+
+.formats { margin-top: 1.5rem; }
+.format-tag {
+  display: inline-block;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin: 0.2rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.cfg-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+  max-width: 160px;
+}
+.cfg-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }

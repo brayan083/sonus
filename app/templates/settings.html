@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Configuracion{% endblock %}
+{% block topbar %}Configuracion{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/settings.css">
+{% endblock %}
+
+{% block content %}
+<div class="settings-wrap">
+  <form method="post" action="/settings" id="settingsForm">
+    <div class="card">
+      <h2>Configuracion de transcripcion</h2>
+
+      <div class="field">
+        <label for="model">Modelo de Whisper</label>
+        <select name="model" id="model">
+          {% for m in models %}
+          <option value="{{ m.id }}" {% if m.id == current_model %}selected{% endif %}>{{ m.label }}{% if m.type == 'api' %} 🌐{% endif %}</option>
+          {% endfor %}
+        </select>
+        <p class="hint">Modelos mas grandes son mas precisos pero mas lentos. Los modelos locales se detectan automáticamente.</p>
+      </div>
+
+      <div class="field" id="openaiKeyField" style="display:none;">
+        <label>API Key de OpenAI</label>
+        {% if current_openai_api_key %}
+        <p class="hint" style="color: var(--green, #22c55e);">✓ Configurada via .env</p>
+        {% else %}
+        <p class="hint" style="color: var(--red, #ef4444);">✗ No configurada — agrega OPENAI_API_KEY en el archivo .env</p>
+        {% endif %}
+      </div>
+
+      <div class="field">
+        <label for="language">Idioma</label>
+        <select name="language" id="language">
+          {% for code, label in languages.items() %}
+          <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <p class="hint">"Auto-detectar" identifica el idioma automaticamente.</p>
+      </div>
+
+      <div class="glow-divider section-divider"></div>
+
+      <h2>Proveedor de IA para resúmenes</h2>
+
+      <div class="field">
+        <label for="ai_provider">Proveedor</label>
+        <select name="ai_provider" id="ai_provider" onchange="toggleProvider()">
+          <option value="ollama" {% if current_ai_provider == 'ollama' %}selected{% endif %}>Ollama (local)</option>
+          <option value="gemini" {% if current_ai_provider == 'gemini' %}selected{% endif %}>Google Gemini (API)</option>
+        </select>
+      </div>
+
+      <div id="ollamaSettings" class="provider-section">
+        <div class="field">
+          <label for="ollama_url">URL de Ollama</label>
+          <input type="url" name="ollama_url" id="ollama_url"
+                 value="{{ current_ollama_url }}" placeholder="http://localhost:11434">
+          <p class="hint">Dirección del servidor Ollama local.</p>
+        </div>
+
+        <div class="field">
+          <label for="ollama_model">Modelo</label>
+          <input type="text" name="ollama_model" id="ollama_model"
+                 value="{{ current_ollama_model }}" placeholder="llama3.2">
+          <p class="hint">Ej: llama3.2, mistral, gemma2, qwen2.5</p>
+        </div>
+      </div>
+
+      <div id="geminiSettings" class="provider-section">
+        <div class="field">
+          <label>API Key de Gemini</label>
+          {% if current_gemini_api_key %}
+          <p class="hint" style="color: var(--green, #22c55e);">✓ Configurada via .env</p>
+          {% else %}
+          <p class="hint" style="color: var(--red, #ef4444);">✗ No configurada — agrega GEMINI_API_KEY en el archivo .env</p>
+          {% endif %}
+        </div>
+
+        <div class="field">
+          <label for="gemini_model">Modelo de Gemini</label>
+          <select name="gemini_model" id="gemini_model">
+            {% for key, label in gemini_models.items() %}
+            <option value="{{ key }}" {% if key == current_gemini_model %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="save-wrap">
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        {% if request.args.get('saved') %}
+        <span class="saved-msg visible">Guardado correctamente</span>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleWhisperApi() {
+  const m = document.getElementById('model').value;
+  document.getElementById('openaiKeyField').style.display = m === 'whisper-api' ? '' : 'none';
+}
+document.getElementById('model').addEventListener('change', toggleWhisperApi);
+toggleWhisperApi();
+
+function toggleProvider() {
+  const p = document.getElementById('ai_provider').value;
+  document.getElementById('ollamaSettings').style.display = p === 'ollama' ? '' : 'none';
+  document.getElementById('geminiSettings').style.display = p === 'gemini' ? '' : 'none';
+}
+toggleProvider();
+</script>
+{% endblock %}

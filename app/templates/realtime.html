@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Tiempo real{% endblock %}
+{% block topbar %}Transcripción en tiempo real{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/realtime.css">
+{% endblock %}
+
+{% block content %}
+<div class="rt-grid">
+  <div class="card rt-controls">
+    <div class="rt-mic-area" id="micArea">
+      <button class="rt-record-btn" id="recordBtn" title="Iniciar grabación">
+        <svg id="micIcon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        <svg id="stopIcon" style="display:none" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="4" y="4" width="16" height="16" rx="2"/>
+        </svg>
+      </button>
+      <p id="rtStatus" class="rt-status">Presiona para grabar</p>
+      <div class="rt-visualizer" id="visualizer" style="display:none">
+        <canvas id="audioCanvas" width="300" height="60"></canvas>
+      </div>
+      <div class="rt-timer" id="timer" style="display:none">00:00</div>
+    </div>
+
+    <div class="rt-config">
+      <h3>Configuración</h3>
+      <div class="info-row">
+        <span>Fuente</span>
+        <select id="rtSource" class="cfg-select">
+          <option value="mic" selected>Micrófono</option>
+          <option value="screen">Pantalla / App</option>
+          <option value="both">Pantalla + Micrófono</option>
+        </select>
+      </div>
+      <div class="info-row">
+        <span>Modelo</span>
+        <select id="rtModel" class="cfg-select">
+          {% for id, label in rt_models.items() %}
+          <option value="{{ id }}" {% if id == 'large-v3-turbo' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="info-row">
+        <span>Idioma</span>
+        <select id="rtLanguage" class="cfg-select">
+          <option value="es" selected>Español</option>
+          <option value="en">English</option>
+          <option value="auto">Auto-detectar</option>
+        </select>
+      </div>
+      <div class="info-row">
+        <span>Intervalo</span>
+        <select id="rtInterval" class="cfg-select">
+          <option value="3000">3 segundos</option>
+          <option value="5000" selected>5 segundos</option>
+          <option value="8000">8 segundos</option>
+          <option value="10000">10 segundos</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card rt-output">
+    <div class="rt-output-header">
+      <h3>Transcripción</h3>
+      <div class="rt-output-actions">
+        <button class="btn btn-primary btn-sm" id="saveBtn" disabled title="Guardar transcripción">Guardar</button>
+        <button class="btn btn-secondary btn-sm" id="copyBtn" disabled title="Copiar texto">Copiar</button>
+        <button class="btn btn-secondary btn-sm" id="clearBtn" disabled title="Limpiar">Limpiar</button>
+      </div>
+    </div>
+    <div class="rt-transcript" id="transcript">
+      <p class="rt-placeholder">El texto aparecerá aquí mientras hablas...</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script src="/static/js/pages/realtime.js"></script>
+{% endblock %}

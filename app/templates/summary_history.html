@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Mis resúmenes{% endblock %}
+{% block topbar %}Mis resúmenes{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/history.css">
+<style>
+  .type-badge {
+    display: inline-flex;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--fuchsia-dim);
+    color: var(--fuchsia);
+  }
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search-bar:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .search-bar .search-icon {
+    font-size: 0.9rem;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .search-bar input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 0.875rem;
+    font-family: inherit;
+  }
+  .search-bar input::placeholder {
+    color: var(--muted);
+  }
+  .no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-dim);
+    font-size: 0.875rem;
+    display: none;
+  }
+  .multi-badge {
+    display: inline-flex;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--cyan-dim, rgba(6,182,212,0.15));
+    color: var(--cyan);
+    margin-left: 0.4rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-wrap">
+  {% if resumenes %}
+
+  <!-- Bulk action bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <span><span class="count" id="selectedCount">0</span> seleccionados</span>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Cancelar</button>
+    <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;" onclick="openDeleteModal()">Eliminar</button>
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Buscar por nombre..." autocomplete="off">
+  </div>
+
+  <div class="card" style="display:flex; flex-direction:column; overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-check"><input type="checkbox" id="checkAll" title="Seleccionar todo"></th>
+          <th>Nombre</th>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Modelo</th>
+          <th>Extensión</th>
+          <th>Idioma</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody">
+        {% for r in resumenes %}
+        <tr data-summary-id="{{ r.summary_id }}">
+          <td class="col-check"><input type="checkbox" class="row-check" value="{{ r.summary_id }}"></td>
+          <td class="name-cell" data-summary-id="{{ r.summary_id }}">
+            <span class="name-text" title="Doble clic para editar">{{ r.summary_name }}</span>
+            <input type="text" class="name-input" value="{{ r.summary_name }}" style="display:none;">
+            {% if r.is_multi %}<span class="multi-badge">Multi</span>{% endif %}
+          </td>
+          <td class="muted">{{ r.date }}</td>
+          <td><span class="type-badge">{{ r.summary_type }}</span></td>
+          <td class="muted" style="font-size:0.8rem;">{{ r.ai_model }}</td>
+          <td class="muted" style="font-size:0.8rem;">{{ r.length }}</td>
+          <td class="muted" style="font-size:0.8rem;">{{ r.language }}</td>
+          <td>
+            <a href="/summary_result/{{ r.summary_id }}" class="btn btn-secondary btn-sm">Ver</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="no-results" id="noResults">No se encontraron resúmenes con ese nombre.</div>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal">
+      <h3>Eliminar resúmenes</h3>
+      <p id="deleteModalText">Se eliminarán <strong></strong> resúmenes. Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeDeleteModal()">Cancelar</button>
+        <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;" onclick="confirmDelete()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card empty">
+    <div class="icon">✨</div>
+    <p>No hay resúmenes todavía.</p>
+    <a href="/history" class="btn btn-primary" style="margin-top:1.25rem; display:inline-flex;">Ir a transcripciones</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Search filter
+const searchInput = document.getElementById('searchInput');
+const noResults = document.getElementById('noResults');
+searchInput?.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  const rows = document.querySelectorAll('#summaryBody tr');
+  let visible = 0;
+  rows.forEach(row => {
+    const name = row.querySelector('.name-text')?.textContent.toLowerCase() || '';
+    const match = !q || name.includes(q);
+    row.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+});
+
+const checkAll = document.getElementById('checkAll');
+const bulkBar = document.getElementById('bulkBar');
+const selectedCount = document.getElementById('selectedCount');
+
+function getChecked() {
+  return [...document.querySelectorAll('.row-check:checked')];
+}
+
+function updateBulkBar() {
+  const checked = getChecked();
+  selectedCount.textContent = checked.length;
+  bulkBar.classList.toggle('visible', checked.length > 0);
+  document.querySelectorAll('#summaryBody tr').forEach(tr => {
+    const cb = tr.querySelector('.row-check');
+    tr.classList.toggle('selected', cb && cb.checked);
+  });
+  const all = document.querySelectorAll('.row-check');
+  checkAll.indeterminate = checked.length > 0 && checked.length < all.length;
+  checkAll.checked = checked.length === all.length;
+}
+
+checkAll?.addEventListener('change', () => {
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = checkAll.checked);
+  updateBulkBar();
+});
+
+document.getElementById('summaryBody')?.addEventListener('change', e => {
+  if (e.target.classList.contains('row-check')) updateBulkBar();
+});
+
+function clearSelection() {
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = false);
+  if (checkAll) checkAll.checked = false;
+  updateBulkBar();
+}
+
+function openDeleteModal() {
+  document.querySelector('#deleteModalText strong').textContent = getChecked().length;
+  document.getElementById('deleteModal').classList.add('visible');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('visible');
+}
+
+async function confirmDelete() {
+  const ids = getChecked().map(cb => cb.value);
+  closeDeleteModal();
+  const res = await fetch('/delete_summaries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ summary_ids: ids })
+  });
+  if (res.ok) {
+    ids.forEach(id => {
+      const row = document.querySelector(`tr[data-summary-id="${id}"]`);
+      if (row) row.remove();
+    });
+    clearSelection();
+    if (!document.querySelector('#summaryBody tr')) location.reload();
+  }
+}
+
+document.getElementById('deleteModal')?.addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeDeleteModal();
+});
+
+// Inline rename on double-click
+document.getElementById('summaryBody')?.addEventListener('dblclick', e => {
+  const cell = e.target.closest('.name-cell');
+  if (!cell) return;
+  const span = cell.querySelector('.name-text');
+  const input = cell.querySelector('.name-input');
+  span.style.display = 'none';
+  input.style.display = '';
+  input.focus();
+  input.select();
+
+  function save() {
+    const newName = input.value.trim();
+    if (newName && newName !== span.textContent) {
+      span.textContent = newName;
+      fetch('/rename_summary/' + cell.dataset.summaryId, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName })
+      });
+    }
+    input.style.display = 'none';
+    span.style.display = '';
+  }
+
+  input.addEventListener('blur', save, { once: true });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { input.value = span.textContent; input.blur(); }
+  });
+});
+</script>
+{% endblock %}

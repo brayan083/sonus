@@ -1,0 +1,10 @@
+flask>=3.0
+flask-socketio
+openai-whisper
+faster-whisper
+torch
+requests
+python-dotenv
+openai
+pymupdf
+python-pptx

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Mis transcripciones{% endblock %}
+{% block topbar %}Mis transcripciones{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/history.css">
+{% endblock %}
+
+{% block content %}
+<div class="history-wrap">
+  {% if transcripciones %} 
+
+  <!-- Bulk action bar -->
+  <div class="bulk-bar" id="bulkBar">
+    <span><span class="count" id="selectedCount">0</span> seleccionadas</span>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" onclick="clearSelection()">Cancelar</button>
+    <button class="btn btn-primary btn-sm" id="btnSummarize" onclick="goSummarizeMulti()" style="display:none;">✨ Resumir</button>
+    <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;" onclick="openDeleteModal()">Eliminar</button>
+  </div>
+
+  <div class="card" style="display:flex; flex-direction:column; overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-check"><input type="checkbox" id="checkAll" title="Seleccionar todo"></th>
+          <th>Archivo</th>
+          <th>Fecha</th>
+          <th>Modelo</th>
+          <th>Duración</th>
+          <th>Segmentos</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        {% for t in transcripciones %}
+        <tr data-job-id="{{ t.job_id }}">
+          <td class="col-check"><input type="checkbox" class="row-check" value="{{ t.job_id }}"></td>
+          <td class="name-cell" data-job-id="{{ t.job_id }}">
+            <span class="name-text" title="Doble clic para editar">{{ t.filename }}</span>
+            <input type="text" class="name-input" value="{{ t.filename }}" style="display:none;">
+          </td>
+          <td class="muted">{{ t.date }}</td>
+          <td class="muted">{{ t.model }}</td>
+          <td class="mono">{{ t.duration }}</td>
+          <td class="muted">{{ t.segments }}</td>
+          <td>
+            <a href="/result/{{ t.job_id }}" class="btn btn-secondary btn-sm">Ver</a>
+            <!-- <a href="/download/{{ t.job_id }}" class="btn btn-primary btn-sm" style="margin-left:0.4rem">JSON</a> -->
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="modal-backdrop" id="deleteModal">
+    <div class="modal">
+      <h3>Eliminar transcripciones</h3>
+      <p id="deleteModalText">Se eliminarán <strong></strong> transcripciones. Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeDeleteModal()">Cancelar</button>
+        <button class="btn btn-sm" style="background:var(--red);color:#fff;border:none;" onclick="confirmDelete()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order modal for multi-summarize -->
+  <div class="modal-backdrop" id="orderModal">
+    <div class="modal" style="max-width:480px;">
+      <h3>Ordenar transcripciones</h3>
+      <p style="margin-bottom:0.75rem;">Ordena las transcripciones en el orden en que deben resumirse (ej. partes de una clase).</p>
+      <ol id="orderList" class="order-list"></ol>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeOrderModal()">Cancelar</button>
+        <button class="btn btn-primary btn-sm" onclick="confirmOrder()">✨ Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card empty">
+    <div class="icon">📂</div>
+    <p>No hay transcripciones todavía.</p>
+    <a href="/" class="btn btn-primary" style="margin-top:1.25rem; display:inline-flex;">Transcribir ahora</a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/pages/history.js"></script>
+{% endblock %}

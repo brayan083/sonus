@@ -1,0 +1,146 @@
+.history-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-wrap .card {
+  flex: 1;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  color: var(--muted);
+}
+.empty .icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+.empty p { color: var(--text-dim); font-size: 0.9rem; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+thead tr { border-bottom: 1px solid var(--border); }
+th { padding: 0.65rem 1rem; color: var(--muted); font-weight: 600; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; }
+td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+[data-theme="light"] td { border-bottom-color: var(--border); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(124,58,237,0.04); }
+tbody tr.selected { background: rgba(124,58,237,0.08); }
+td.muted { color: var(--text-dim); font-size: 0.82rem; }
+td.mono  { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.8rem; color: var(--cyan); }
+
+/* Checkbox */
+th.col-check, td.col-check { width: 2.5rem; padding-right: 0; }
+input[type="checkbox"] {
+  width: 1rem; height: 1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Bulk action bar */
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.bulk-bar.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+.bulk-bar .count { font-weight: 600; color: var(--text); }
+.bulk-bar .spacer { flex: 1; }
+
+/* Delete confirm modal */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.15s;
+}
+.modal-backdrop.visible { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  max-width: 380px;
+  width: 90%;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+.modal h3 { margin: 0 0 0.5rem; font-size: 1rem; font-weight: 600; color: var(--text); }
+.modal p { margin: 0 0 1.5rem; font-size: 0.875rem; color: var(--text-dim); }
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+
+/* Order list for multi-summarize */
+.order-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.25rem;
+  counter-reset: order;
+}
+.order-list li {
+  counter-increment: order;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+  background: var(--surface2);
+  font-size: 0.85rem;
+}
+.order-list li::before {
+  content: counter(order);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+.drag-handle { cursor: grab; color: var(--text-dim); user-select: none; }
+.order-name { flex: 1; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-date { color: var(--text-dim); font-size: 0.78rem; }
+.order-arrows { display: flex; flex-direction: column; gap: 1px; }
+.btn-arrow {
+  background: none; border: none; color: var(--text-dim); cursor: pointer;
+  font-size: 0.6rem; padding: 0 0.25rem; line-height: 1;
+}
+.btn-arrow:hover { color: var(--accent); }
+
+/* Inline rename */
+.name-text { cursor: pointer; }
+.name-text:hover { color: var(--accent); }
+.name-input {
+  font: inherit;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text);
+  width: 100%;
+  outline: none;
+}

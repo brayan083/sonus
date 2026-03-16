@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Resumir{% endblock %}
+{% block topbar %}Resumir transcripción{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/pages/summarize.css">
+{% endblock %}
+
+{% block content %}
+<div class="summarize-wrap">
+  <form method="post" action="/summarize/{{ job_id }}" enctype="multipart/form-data">
+
+    <div class="file-info">
+      <span class="icon">📄</span>
+      <span class="name">{{ filename }}</span>
+      <span class="meta">{{ segments }} segmentos · {{ duration }}</span>
+    </div>
+
+    <div class="card">
+      <h2>Opciones de resumen <span class="ai-badge">✨ {{ provider_label }}</span></h2>
+
+      <div class="field">
+        <label for="summary_name">Nombre del resumen</label>
+        <input type="text" name="summary_name" id="summary_name" placeholder="Ej: Resumen clase 1" value="Resumen - {{ filename }}">
+      </div>
+
+      <div class="field">
+        <label for="summary_type">Tipo de resumen</label>
+        <select name="summary_type" id="summary_type">
+          {% for key, label in summary_types.items() %}
+          <option value="{{ key }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="length">Extensión</label>
+        <select name="length" id="length">
+          <option value="short">Corto</option>
+          <option value="medium" selected>Medio</option>
+          <option value="detailed">Detallado</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="language">Idioma del resumen</label>
+        <select name="language" id="language">
+          {% for code, label in languages.items() %}
+          {% if code != 'auto' %}
+          <option value="{{ code }}" {% if code == current_language %}selected{% endif %}>{{ label }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="attachments">Material de apoyo (opcional)</label>
+        <div class="file-drop-zone" id="dropZone">
+          <input type="file" name="attachments" id="attachments" multiple accept=".pdf,.pptx,.ppt,.png,.jpg,.jpeg">
+          <div class="drop-label">
+            <span class="drop-icon">📎</span>
+            <span>Arrastra archivos aquí o <strong>haz clic</strong> para seleccionar</span>
+            <span class="drop-hint">PDF, PPTX, imágenes</span>
+          </div>
+          <div class="file-list" id="fileList"></div>
+        </div>
+      </div>
+
+      <div class="submit-wrap">
+        <button type="submit" class="btn btn-primary">✨ Generar resumen</button>
+        <a href="/history" class="btn btn-ghost">Volver</a>
+      </div>
+      <p class="ollama-info">Usando <code>{{ provider_model }}</code> ({{ provider_label }}). <a href="/settings">Cambiar</a></p>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const input = document.getElementById('attachments');
+const fileList = document.getElementById('fileList');
+const dropZone = document.getElementById('dropZone');
+
+input.addEventListener('change', updateFileList);
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  input.files = e.dataTransfer.files;
+  updateFileList();
+});
+
+function updateFileList() {
+  fileList.innerHTML = '';
+  for (const f of input.files) {
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.textContent = f.name;
+    fileList.appendChild(div);
+  }
+}
+</script>
+{% endblock %}
