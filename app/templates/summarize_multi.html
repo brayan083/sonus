@@ -32,7 +32,7 @@
 
 {% block content %}
 <div class="summarize-wrap">
-  <form method="post" action="/summarize_multi">
+  <form method="post" action="/summarize_multi" enctype="multipart/form-data">
     {% for t in transcripciones %}
     <input type="hidden" name="ids" value="{{ t.job_id }}">
     {% endfor %}
@@ -89,6 +89,19 @@
         </select>
       </div>
 
+      <div class="field">
+        <label for="attachments">Material de apoyo (opcional)</label>
+        <div class="file-drop-zone" id="dropZone">
+          <input type="file" name="attachments" id="attachments" multiple accept=".pdf,.pptx,.ppt,.docx,.doc,.png,.jpg,.jpeg">
+          <div class="drop-label">
+            <span class="drop-icon">📎</span>
+            <span>Arrastra archivos aquí o <strong>haz clic</strong> para seleccionar</span>
+            <span class="drop-hint">PDF, PPTX, Word, imágenes</span>
+          </div>
+          <div class="file-list" id="fileList"></div>
+        </div>
+      </div>
+
       <div class="submit-wrap">
         <button type="submit" class="btn btn-primary">✨ Generar resumen</button>
         <a href="/history" class="btn btn-ghost">Volver</a>
@@ -97,4 +110,33 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const input = document.getElementById('attachments');
+const fileList = document.getElementById('fileList');
+const dropZone = document.getElementById('dropZone');
+
+input.addEventListener('change', updateFileList);
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  input.files = e.dataTransfer.files;
+  updateFileList();
+});
+
+function updateFileList() {
+  fileList.innerHTML = '';
+  for (const f of input.files) {
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.textContent = f.name;
+    fileList.appendChild(div);
+  }
+}
+</script>
 {% endblock %}

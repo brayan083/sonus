@@ -8,3 +8,4 @@ python-dotenv
 openai
 pymupdf
 python-pptx
+python-docx

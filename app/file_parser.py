@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-ALLOWED_EXTENSIONS = {".pdf", ".pptx", ".ppt", ".png", ".jpg", ".jpeg"}
+ALLOWED_EXTENSIONS = {".pdf", ".pptx", ".ppt", ".docx", ".doc", ".png", ".jpg", ".jpeg"}
 
 
 def extract_text(filepath: str) -> str:
@@ -14,6 +14,8 @@ def extract_text(filepath: str) -> str:
         return _extract_pdf(filepath)
     elif ext in (".pptx", ".ppt"):
         return _extract_pptx(filepath)
+    elif ext in (".docx", ".doc"):
+        return _extract_docx(filepath)
     elif ext in (".png", ".jpg", ".jpeg"):
         return _extract_image(filepath)
     return ""
@@ -43,6 +45,17 @@ def _extract_pptx(filepath: str) -> str:
         if slide_texts:
             text_parts.append(f"[Diapositiva {i}]\n" + "\n".join(slide_texts))
     return "\n\n".join(text_parts).strip()
+
+
+def _extract_docx(filepath: str) -> str:
+    from docx import Document
+    doc = Document(filepath)
+    text_parts = []
+    for para in doc.paragraphs:
+        t = para.text.strip()
+        if t:
+            text_parts.append(t)
+    return "\n".join(text_parts).strip()
 
 
 def _extract_image(filepath: str) -> str:

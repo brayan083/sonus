@@ -66,7 +66,7 @@ CHUNK_TARGET_WORDS = 5000    # target words per chunk
 
 
 def build_multi_prompt(summary_type: str, length: str, language: str,
-                       transcriptions: list[dict]) -> str:
+                       transcriptions: list[dict], attachments_text: str = "") -> str:
     """Build a prompt for summarizing multiple transcriptions in order."""
     instruction = _PROMPTS.get(summary_type, _PROMPTS["general"])
     length_hint = SUMMARY_LENGTHS.get(length, SUMMARY_LENGTHS["medium"])
@@ -80,6 +80,15 @@ def build_multi_prompt(summary_type: str, length: str, language: str,
         parts.append(f"--- PARTE {i}: {t.get('filename', '?')} ---\n{text}")
 
     joined = "\n\n".join(parts)
+
+    context_section = ""
+    if attachments_text:
+        context_section = (
+            "A continuación se incluye material de apoyo (PDFs, presentaciones, etc.) "
+            "que complementa las transcripciones. Úsalo para enriquecer y dar más contexto al resumen.\n\n"
+            f"--- CONTEXTO ADICIONAL ---\n{attachments_text}\n--- FIN CONTEXTO ---\n\n"
+        )
+
     return (
         f"{instruction}\n\n"
         f"A continuación se presentan {len(transcriptions)} transcripciones en orden secuencial "
@@ -88,6 +97,7 @@ def build_multi_prompt(summary_type: str, length: str, language: str,
         f"{length_hint}\n"
         f"Responde en {lang_name}."
         f"{_STYLE_GUIDE}\n\n"
+        f"{context_section}"
         f"{joined}\n--- FIN ---"
     )
 

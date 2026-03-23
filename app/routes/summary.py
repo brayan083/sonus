@@ -74,13 +74,15 @@ def _run_summary(summary_id: str, job_id: str, data: dict,
 
 def _run_multi_summary(summary_id: str, job_ids: list[str], all_data: list[dict],
                        summary_type: str, length: str, language: str,
-                       summary_name: str = ""):
+                       summary_name: str = "", attachments_text: str = ""):
     short_id = summary_id[:8]
     names = ", ".join(d.get("filename", "?") for d in all_data)
     print(f"\n[{short_id}] Generando resumen multi ({len(all_data)} partes): {names}")
+    if attachments_text:
+        print(f"[{short_id}] Con material de apoyo ({len(attachments_text)} caracteres)")
     try:
         cfg = load_settings()
-        prompt = ai_service.build_multi_prompt(summary_type, length, language, all_data)
+        prompt = ai_service.build_multi_prompt(summary_type, length, language, all_data, attachments_text)
         result = ai_service.summarize(prompt, cfg)
         provider = cfg.get("ai_provider", "ollama")
         provider_model = cfg.get("gemini_model", "") if provider == "gemini" else cfg.get("ollama_model", "")
@@ -133,11 +135,29 @@ def summarize_multi():
         length = request.form.get("length", "medium")
         language = request.form.get("language", cfg["language"])
         summary_name = request.form.get("summary_name", "").strip()
+
+        # Process attached files
+        attachments_text = ""
+        uploaded = request.files.getlist("attachments")
+        temp_paths = []
+        for f in uploaded:
+            if f and f.filename:
+                ext = Path(f.filename).suffix.lower()
+                if ext in file_parser.ALLOWED_EXTENSIONS:
+                    tmp = tempfile.NamedTemporaryFile(suffix=ext, delete=False)
+                    f.save(tmp.name)
+                    tmp.close()
+                    temp_paths.append(tmp.name)
+        if temp_paths:
+            attachments_text = file_parser.extract_from_files(temp_paths)
+            for p in temp_paths:
+                os.unlink(p)
+
         summary_id = uuid.uuid4().hex
         summary_jobs[summary_id] = "processing"
         t = threading.Thread(
             target=_run_multi_summary,
-            args=(summary_id, ids, all_data, summary_type, length, language, summary_name),
+            args=(summary_id, ids, all_data, summary_type, length, language, summary_name, attachments_text),
             daemon=True,
         )
         t.start()
