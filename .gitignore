@@ -1,3 +1,6 @@
+# Ignora todo en app/data excepto settings.json
+app/data/*
+!app/data/settings.json
 # Python
 __pycache__/
 *.pyc
@@ -7,11 +10,11 @@ venv/
 env/
 
 # Data (keep folder structure, ignore generated files)
-app/data/**
-!app/data/.gitkeep
-!app/data/uploads/.gitkeep
-!app/data/transcripciones/.gitkeep
-!app/data/summary/.gitkeep
+
+app/data/.gitkeep
+app/data/uploads/.gitkeep
+app/data/transcripciones/.gitkeep
+app/data/summary/.gitkeep
 
 # Environment
 .env
@@ -23,4 +26,3 @@ app/data/**
 # OS
 .DS_Store
 
-clase1_POO.mp4

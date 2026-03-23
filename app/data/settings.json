@@ -1,0 +1,8 @@
+{
+  "model": "large-v3-turbo",
+  "language": "es",
+  "ai_provider": "gemini",
+  "ollama_url": "http://localhost:11434",
+  "ollama_model": "llama3.2",
+  "gemini_model": "gemini-2.5-pro"
+}
