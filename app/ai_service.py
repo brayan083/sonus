@@ -257,19 +257,37 @@ def summarize_ollama(prompt: str, base_url: str = "http://localhost:11434", mode
 # ── Gemini provider ─────────────────────────────────────
 
 def summarize_gemini(prompt: str, api_key: str, model: str = "gemini-2.5-pro") -> str:
+    import time
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-    r = requests.post(
-        url,
-        params={"key": api_key},
-        json={
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"maxOutputTokens": 65536},
-        },
-        timeout=600,
-    )
-    r.raise_for_status()
-    data = r.json()
-    return data["candidates"][0]["content"]["parts"][0]["text"]
+    max_retries = 3
+    for attempt in range(max_retries):
+        r = requests.post(
+            url,
+            params={"key": api_key},
+            json={
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"maxOutputTokens": 65536},
+            },
+            timeout=600,
+        )
+        if r.status_code == 503:
+            if attempt < max_retries - 1:
+                time.sleep(5 * (attempt + 1))
+                continue
+            raise RuntimeError(
+                f"El modelo {model} está temporalmente saturado (503). "
+                "Intenta de nuevo en unos minutos o cambia a un modelo más disponible "
+                "como 'gemini-2.5-flash' en Configuración."
+            )
+        if r.status_code == 429:
+            raise RuntimeError(
+                "Límite de requests de Gemini alcanzado (429). "
+                "Espera un momento y vuelve a intentarlo."
+            )
+        if not r.ok:
+            raise RuntimeError(f"Error de Gemini ({r.status_code}): {r.text[:300]}")
+        data = r.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"]
 
 
 # ── Unified summarize ───────────────────────────────────
